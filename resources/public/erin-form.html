@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Erin</title>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.5.0/pure-min.css">
+    <link rel="stylesheet" type="text/css" href="css/erin.css">
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script type="text/javascript" src="https://code.jquery.com/ui/1.11.3/jquery-ui.js"></script>
+    <script type="text/javascript" src="js/dust.js"></script>
+    <script type="text/javascript" src="js/purl.js"></script>
+    <script type="text/javascript" src="js/erin-forms.js"></script>
+
+</head>
+<body>
+<div id="main">
+    <div id="main-entity"></div>
+</div>
+<div id="list-left" class="link-list"></div>
+<div id="list-right" class="link-list"></div>
+
+<div style="position:absolute;left:0;top:0" id="exception"></div>
+
+</body>
+<script>
+
+
+    var lookupMap = { "shows": function () {
+        initLookup("shows", 'show_name', ['show_name'], "/v1/erin-form.html?entity=shows&id=", "#shows-show_name-search")
+        initLookup("media_types", 'media_type', ['media_type'], "#shows-form #media_type", "#shows-media_type-search", "media_type");
+        initLookup("networks", 'network', ['network'], "#shows-form #network_id", "#shows-network-search");
+        }
+    };
+
+    var prePopMap = {
+        "episodes" : {
+            "id" : "series_id",
+            "network_id" : "network_id",
+            "origin_language" : "origin_language",
+            "origin_country" : "origin_country",
+            "top_cast" : "top_cast"
+        }
+    };
+
+    function getLookups(entity) {
+        var func = lookupMap[entity];
+        if ( func ) {
+            func.apply();
+        }
+    }
+    $(document).ready(function () {
+        var entity = $.url().param('entity');
+        var entity_id = $.url().param('id');
+        var key = $.url().param('key');
+        var value = $.url().param('value');
+        var parent_entity = $.url().param('parent_entity');
+
+        if ( key ) {
+            populateSummary(entity, key, value, "#list-left")
+        }
+        compileTemplate(entity)
+                .then(
+                    lookupEntityById(entity, entity_id, function(data ) {
+                        renderTemplate(entity, data, "#main-entity");
+                        getLookups(entity);
+                        populateRelationships(entity, data, "#list-right");
+                        var update = true;
+                        var formFunc = putForm;
+                        if (jQuery.isEmptyObject(data)) {
+                            update = false;
+                            formFunc = postForm;
+                            if ( parent_entity) {
+                                prepopulateForm(entity, parent_entity, value, "#main-entity", prePopMap[entity]);
+                            }
+                        }
+                        setupForm(entity,formFunc,update);
+
+                    }));
+
+
+    });
+</script>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <title>Tempo :: The Intuitive JavaScript Template Engine by Twigkit</title>
+    <link rel="stylesheet" href="css/tempo.css" type="text/css" media="screen">
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js"></script>
+    <script type="text/javascript" src="tempo.js"></script>
+    <script type="text/javascript" src="js/purl.js"></script>
+    <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <style>
+        ol#tweets {
+            margin: 0;
+        }
+        ol#tweets li {
+            overflow: hidden;
+            list-style: none outside none;
+        }
+        ol#tweets li img {
+            float: left;
+            margin-right: 10px;
+            width: 48px;
+            height: 48px;
+        }
+        ol#tweets li h3 {
+            margin: 0;
+            font-size: 0.9em;
+            font-family: Helvetica;
+            font-weight: bold;
+        }
+        ol#tweets li p span {
+            font-size: 0.8em;
+        }
+        ol#tweets li p {
+            font-size: 0.9em;
+            color: #666;
+        }
+        ol#tweets li:last-child p {
+            margin-bottom: 0;
+        }
+    </style>
+
+</head>
+<body>
+
+<div >
+    <form  id='artist_form'>
+        <input data-template type="text" id="id" value="{{artist.id}}"><br/>
+        <input data-template type="text" id="genre" value="{{artist.role}}"><br/>
+    </form>
+</div>
+
+    <ol id="artists">
+        <li data-template>{{genre}}</li>
+    </ol>
+</body>
+<script>
+    $(document).ready(function() {
+        // jQuery example
+
+        var id = $.url().param('id');
+        $.getJSON("http://localhost:3000/erin/artists/" + id, function(data) {
+
+
+            Tempo.prepare('artist_form').errors(function (err ) {
+                console.log(err)
+
+            }).render({ artist : data});
+            // alert("results:" + data[0].genre);
+        });
+    });
+</script>
+</html>

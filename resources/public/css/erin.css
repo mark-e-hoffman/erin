@@ -1,0 +1,84 @@
+.x-button {
+        text-decoration: none;
+        display: inline-block; padding: 2px 8px;
+        border-style: none; border-width: 1px;
+        float:right;
+}
+.form-panel {
+    float:left;
+    top: 1%;
+    border-style: none;
+    border-width: 0px;
+}
+
+.forn-panel-column {
+    width: 33%;
+    padding: 10px 30px;
+    float: left;
+}
+
+
+.centerDiv
+{
+    position: absolute;
+    top: 1%;
+    display: inline-block;
+    z-index: 1000;
+    left: 50%;
+    margin: 5 auto;
+    padding: 10px 10px;
+    color:green;
+}
+.search-box-visible
+{
+    position: relative;
+    z-index: 1000;
+    width: 200px;
+    display :inline-block;
+}
+
+.search-box-hidden {
+    display :none;
+}
+
+.inline {
+    display :inline-block;
+}
+
+.float-left {
+    float:left;
+}
+
+
+div.link-list {
+    width:10.2em;
+    height:100%;
+    position:absolute;
+    top:0;
+    font-size:80%;
+    padding-left:1%;
+    padding-right:1%;
+    margin-left:0;
+    margin-right:0;
+    border-style: solid;
+
+}
+/* we leave some place on the side using the margin-* properties */
+#main {
+    margin-left:10.2em;
+    margin-right:10.2em;
+    padding-left:1em;
+    padding-right:1em;
+    height:100%;
+    overflow: scroll;
+}
+/* and then we put each list on its place */
+#list-left {
+    left:0;
+    overflow: scroll;
+}
+#list-right {
+    right:0;
+    overflow: scroll;
+}
+
