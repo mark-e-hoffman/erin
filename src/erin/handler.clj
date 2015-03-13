@@ -77,30 +77,6 @@
 (defroutes app-routes
   (context "/erin" []
     (defroutes erin-routes
-    (context "/artists" []
-      (defroutes artists-routes
-        (GET "/" request (resp/response (crud/search :artists (:params request))))
-        (POST "/" request (resp/response (crud/create :artists (:body request))))
-        (context "/:id" [id] (defroutes artist-route
-          (GET "/" [] (resp/response (crud/get-by-id :artists id)))
-          (PUT "/" request (resp/response (crud/update :artists id (:body request))))
-          (DELETE "/" [] (resp/response (crud/delete :artists id)))))))
-    (context "/authors" []
-      (defroutes authors-routes
-        (GET "/" request (resp/response (crud/search :authors (:params request))))
-        (POST "/" request (resp/response (crud/create :authors (:body request))))
-        (context "/:id" [id] (defroutes author-route
-          (GET "/" [] (resp/response (crud/get-by-id :authors id)))
-          (PUT "/" request (resp/response (crud/update :authors id (:body request))))
-          (DELETE "/" [] (resp/response (crud/delete :authors id)))))))
-    (context "/entities" []
-      (defroutes entities-routes
-        (GET "/" request (resp/response (crud/search :entities (:params request))))
-        (POST "/" request (resp/response (crud/create :entities (:body request))))
-          (context "/:id" [id] (defroutes entity-route
-            (GET "/" [] (resp/response (crud/get-by-id :entities id)))
-            (PUT "/" request (resp/response (crud/update :entities id (:body request))))
-            (DELETE "/" [] (resp/response (crud/delete :entities id)))))))
     (context "/:table" [ table ]
       (defroutes tables-routes
         (GET "/" request (resp/response (crud/search (keyword table) (dissoc (:params request) :table))))

@@ -1,8 +1,6 @@
 <div id="shows-wrapper">
-<legend>Show</legend>
-      <div class="pure-control-group">
-        Search By Show Name <div class="inline" id="shows-show_name-search">
-     </div>
+<legend> <a href="erin-form.html?entity=shows" class="add-entity">+</a> Show</legend>
+
      <form class="pure-form pure-form-aligned" id="shows-form">
        <fieldset>
 
@@ -13,28 +11,32 @@
     </div>
     <div class="pure-control-group">
             <label for="show_name">Show Name</label>
-            <input type="text" name="show_name" id="show_name" placeholder="Show Name" value="{show_name}">
-    </div>
-    <div class="pure-control-group">
-            <label for="media_type">Media Type</label>
-            <input type="text" name="media_type" id="media_type" readonly placeholder="Media Type" value="{media_type}"><div class="inline" id='shows-media_type-search'></div>
+        <input type="text" name="show_name" id="show_name" value="{show_name}">
 
     </div>
     <div class="pure-control-group">
-            <label for="network_id">Network ID</label>
-            <input type="text" name="network_id" id="network_id" readonly placeholder="Network ID" value="{network_id}"><div class="inline" id='shows-network-search'></div>
+            <label for="media_type">Media Type</label>
+            <input type="hidden" name="media_type" id="media_type" placeholder="Media Type" value="{media_type}">
+            <input type="text" name="shows-media_type-search" id="shows-media_type-search" form="XXX"> <img class="lookupIcon">
+
+    </div>
+    <div class="pure-control-group">
+            <label for="network_id">Network</label>
+            <input type="hidden" name="network_id" id="network_id"  value="{network_id}">
+            <input type="text" name="shows-network-search" id="shows-network-search" form="XXX"> <img class="lookupIcon">
     </div>
     <div class="pure-control-group">
             <label for="start_year">Start Year</label>
-            <input type="text" name="start_year" id="start_year" placeholder="Start Year" value="{start_year}">
+            <input type="text"  maxlength="4" name="start_year" id="start_year" placeholder="Start Year" value="{start_year}">
     </div>
        <div class="pure-control-group">
                 <label for="end_year">End Year</label>
-                <input type="text" name="end_year" id="end_year" placeholder="End Year" value="{end_year}">
+                <input type="text"  maxlength="4" name="end_year" id="end_year" placeholder="End Year" value="{end_year}">
         </div>
     <div class="pure-control-group">
             <label for="orig_air_date">Original Air Date</label>
             <input type="text" name="orig_air_date" id="orig_air_date" placeholder="Original Air Date" value="{orig_air_date}">
+
     </div>
     <div class="pure-control-group">
                 <label for="release_date">Release Date</label>
@@ -42,38 +44,54 @@
    </div>
     <div class="pure-control-group">
             <label for="origin_language">Origin Language</label>
-            <input type="text" name="origin_language" id="origin_language" placeholder="Origin Language" value="{origin_language}">
+            <input  maxlength="2" type="text" name="origin_language" id="origin_language" placeholder="Origin Language" value="{origin_language}">
      </div>
        <div class="pure-control-group">
                  <label for="origin_country">Origin Country</label>
-                 <input type="text" name="origin_country" id="origin_language" placeholder="Origin Country" value="{origin_country}">
+                 <input  maxlength="2" type="text" name="origin_country" id="origin_country" placeholder="Origin Country" value="{origin_country}">
           </div>
 
       <div class="pure-control-group">
                 <label for="short_desc">Short Description</label>
-                <textarea name="short_desc" id="short_desc" form="shows-form">{show_desc}</textarea>
+                <textarea cols="80" name="short_desc" id="short_desc" form="shows-form">{short_desc}</textarea>
         </div>
 
            <div class="pure-control-group">
                         <label for="plot_desc">Plot Description</label>
-                        <textarea name="plot_desc" id="plot_desc" form="shows-form">{plot_desc}</textarea>
+                        <textarea cols="80" name="plot_desc" id="plot_desc" form="shows-form">{plot_desc}</textarea>
                 </div>
        <div class="pure-control-group">
-                 <label for="top_casey">Top Cast</label>
-                 <input type="text" name="top_cast" id="top_cast" placeholder="Top Cast" value="{top_cast}">
+                 <label for="top_cast">Top Cast</label>
+                 <input size="80" type="text" name="top_cast" id="top_cast" placeholder="Top Cast" value="{top_cast}">
           </div>
 
            <div class="pure-control-group">
                         <label for="editor_notes">Editor Notes</label>
-                        <textarea name="editor_notes" id="editor_notes" form="shows-form">{editor_notes}</textarea>
+                        <textarea cols="80" name="editor_notes" id="editor_notes" form="shows-form">{editor_notes}</textarea>
                 </div>
 
     <div class="pure-controls">
-            <button type="submit" id='submit' class="pure-button pure-button-primary">Add</button>
+            <button type="submit" id='submit-button' class="pure-button pure-button-primary">Add</button>
     </div>
     </div>
 
     </fieldset>
     </form>
  </div>
+
+<script>
+    $(function() {
+        $( "#shows-form #orig_air_date" ).datepicker({
+            dateFormat: "yy-mm-dd"
+        });
+    });
+    $(function() {
+        $( "#shows-form #release_date").datepicker({
+            dateFormat: "yy-mm-dd"
+        });
+    });
+    initComboBox("media_types", 'media_type', ['media_type'], "#shows-form #media_type", "#shows-media_type-search", "media_type");
+    initComboBox("networks", 'network', ['network'], "#shows-form #network_id", "#shows-network-search");
+</script>
+
 

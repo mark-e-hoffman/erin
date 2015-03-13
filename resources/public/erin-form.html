@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="Cache-Control" content="no-store, must-revalidate, max-age=0">
+    <meta name="Pragma" content="no-cache">
+    <meta name="Expires" content="Sat, 26 Jul 1997 05:00:00 GMT">
     <title>Erin</title>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.3/themes/smoothness/jquery-ui.css">
     <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.5.0/pure-min.css">
@@ -16,23 +19,57 @@
 </head>
 <body>
 <div id="main">
+
+    <div id='menus' class="pure-menu pure-menu-open pure-menu-horizontal">
+        <ul>
+            <li><a id="shows-tab" href='erin-form.html?entity=shows'>Shows</a></li>
+            <li><a id="people-tab" href='erin-form.html?entity=people'>People</a></li>
+            <li><a id="networks-tab" href='erin-form.html?entity=networks'>Networks</a></li>
+        </ul>
+    </div>
+
     <div id="main-entity"></div>
 </div>
 <div id="list-left" class="link-list"></div>
 <div id="list-right" class="link-list"></div>
 
 <div style="position:absolute;left:0;top:0" id="exception"></div>
-
+<input type="hidden" id="refreshed" value="no">
+"</div><div id='info-overlay' class='hidden'></div></div>
 </body>
 <script>
 
 
-    var lookupMap = { "shows": function () {
-        initLookup("shows", 'show_name', ['show_name'], "/v1/erin-form.html?entity=shows&id=", "#shows-show_name-search")
-        initLookup("media_types", 'media_type', ['media_type'], "#shows-form #media_type", "#shows-media_type-search", "media_type");
-        initLookup("networks", 'network', ['network'], "#shows-form #network_id", "#shows-network-search");
+    var lookupMap = {
+        "showsss": function () {
+            initComboBox("media_types", 'media_type', ['media_type'], "#shows-form #media_type", "#shows-media_type-search", "media_type");
+            initComboBox("networks", 'network', ['network'], "#shows-form #network_id", "#shows-network-search");
+            },
+        "people": function () {
+            initLookup("people", 'name', ['name'], "/v1/erin-form.html?entity=people&id=", "#people-name-search");
+
+        },
+        "creditss": function () {
+           // initLookup("shows", 'show_name', ['show_name'], "#credits-form #table_id", "#credits-show_name-search")
+           // initLookup("people", 'name', ['name'], "#credits-form #person_id", "#credits-person_id-search")
+           // initLookup("characters", 'character_name', ['character_name'], "#credits-form #character_id", "#credits-character_id-search")
+           // initLookup("person_roles", 'person_role', ['person_role'], "#credits-form #role_id", "#credits-role_id-search");
+        },
+        "characters": function () {
+            initLookup("characters", 'name', ['name'], "/v1/erin-form.html?entity=characters&id=", "#characters-name-search");
+
+        },
+        "networks": function () {
+            initLookup("networks", 'network', ['network'], "/v1/erin-form.html?entity=networks&id=", "#networks-network-search");
+
+        },
+        "social_links" : function () {
+            initLookup("shows_and_people", 'table_name', ['table_name'], "#social_links-form #table_id", "#social_links-table_id-search")
+            initLookup("social_link_types", 'link_type', ['link_type'], "#social_links-form #link_type", "#social_links-link_type-search", "link_type")
         }
+
     };
+
 
     var prePopMap = {
         "episodes" : {
@@ -42,42 +79,69 @@
             "origin_country" : "origin_country",
             "top_cast" : "top_cast"
         }
+
     };
 
     function getLookups(entity) {
         var func = lookupMap[entity];
+
         if ( func ) {
+
             func.apply();
         }
     }
     $(document).ready(function () {
+
+        var e=document.getElementById("refreshed");
+        if (e.value=="no")
+            e.value="yes";
+        else {
+            e.value="no";
+            location.reload();
+        }
+
         var entity = $.url().param('entity');
         var entity_id = $.url().param('id');
         var key = $.url().param('key');
         var value = $.url().param('value');
         var parent_entity = $.url().param('parent_entity');
+        var summary_view = $.url().param('summary_view');
+        console.log('entity:' + entity +',entity_id:' + entity_id + "key+" + key + ",value=" + value + ",parent_entity:" + parent_entity);
 
         if ( key ) {
-            populateSummary(entity, key, value, "#list-left")
+            populateSummary(entity, key, value, "#list-left", summary_view)
         }
         compileTemplate(entity)
                 .then(
                     lookupEntityById(entity, entity_id, function(data ) {
                         renderTemplate(entity, data, "#main-entity");
+                        console.log('calling getLookups...');
                         getLookups(entity);
                         populateRelationships(entity, data, "#list-right");
-                        var update = true;
-                        var formFunc = putForm;
-                        if (jQuery.isEmptyObject(data)) {
-                            update = false;
-                            formFunc = postForm;
-                            if ( parent_entity) {
-                                prepopulateForm(entity, parent_entity, value, "#main-entity", prePopMap[entity]);
+
+                        if (!jQuery.isEmptyObject(data)) {
+
+                            setupForm(entity,putForm, true);
+
+                        } else {
+
+                            setupForm(entity, postForm, false);
+                            if ( parent_entity == 'foobar') {
+
+                                if (prePopMap[entity]) {
+                                    prepopulateForm(entity, parent_entity, value, "#main-entity", prePopMap[entity]);
+                                }
+
+                            }
+                            else {
+                                //setupForm(entity, postForm, false);
                             }
                         }
-                        setupForm(entity,formFunc,update);
+
+
 
                     }));
+
 
 
     });

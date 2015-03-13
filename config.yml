@@ -2,14 +2,11 @@
 database :
   jdbc-driver :
     subprotocol : "postgresql"
-    subname : "//localhost:5432/erindb2"
+    subname : "//localhost:5432/erindb"
   meta-data :
     schema : "erin"
     tables :
-       artists : "artist"
        people :  "people"
-       authors : "authors"
-       entities : "entity"
        characters : "characters"
        photos : "photos"
        networks : "networks"
@@ -19,6 +16,14 @@ database :
        character_xref : "character_xref"
        person_xref : "person_xref"
        rel_types : "rel_types"
+       credits : "credits"
+       person_roles : "person_roles"
+       credits_summary : "credits_summary"
+       social_links : "social_links"
+       social_link_types : "social_link_types"
+       shows_and_people : "shows_and_people"
+    primary-keys :
+       media_types : "media_type"
 
 http :
    port : 8080

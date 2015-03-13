@@ -1,5 +1,5 @@
 <div id="people-wrapper">
-<legend>Person</legend>
+<legend> <a href="erin-form.html?entity=people" class="add-entity">+</a> Person</legend>
 <form class="pure-form pure-form-aligned" id="people-form">
        <fieldset>
 
@@ -9,7 +9,7 @@
     </div>
     <div class="pure-control-group">
             <label for="name">Name</label>
-            <input type="text" name="name" id="name" placeholder="Name" value="{name}">
+            <input type="text" name="name" id="name" placeholder="Name" value="{name}"><div class="inline" id='people-name-search'></div>
     </div>
     <div class="pure-control-group">
             <label for="person_note">Note</label>

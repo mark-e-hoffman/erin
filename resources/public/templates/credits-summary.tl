@@ -1,8 +1,8 @@
 <div id="credits-summary">
     <legend>Credits</legend>
     <ul>
-        {#.}
-        <li><a href="javascript:populateDetail('credits','{.id}');">{.character_name}</a><br/></li>
-        {/.}
+        {#.items}
+        <li><a href="javascript:populateDetail('credits','{.id}');">{.person_name} as {.name}/{.role}</a><br/></li>
+        {/.items}
     </ul>
 </div>

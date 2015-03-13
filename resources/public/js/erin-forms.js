@@ -5,20 +5,24 @@ function closeForm(elem) {
 function renderTemplate(name, data, target) {
     dust.render(name, data, function (err, out) {
         if ( err )
-            console.log("ERROR:" + err);
-        $(target).html(out);
+            console.log("renderTemplate ERROR:" + err);
+        else {
+            $(target).html(out);
+        }
     });
 }
 
-function setupForm( name, func, update) {
+function setupForm( name, func, update, callBack) {
     var formName = '#' + name + '-form';
     $(formName).submit(function (event) {
-        func(event, name, '#' + name + '-form');
+        console.log('calling submit for:' + formName);
+        event.preventDefault();
+        func(event, name, formName, callBack);
     });
-    console.log(formName + ', update=' + update);
+    console.log("setupForm:" + formName + ', update=' + update);
     if ( update ) {
-
-        $(formName + ' #submit').html("Update");
+        console.log(formName + ' changing to update');
+        $(formName + ' #submit-button').html("Update");
     }
 }
 
@@ -26,6 +30,7 @@ function setupForm( name, func, update) {
 function compileTemplate(name) {
 
     return $.ajax("templates/" + name + ".tl", {
+        cache: false,
         success: function (data) {
             var compiled = dust.compile(data, name);
             dust.loadSource(compiled);
@@ -55,12 +60,16 @@ function setStatus(msg) {
     });
 }
 
+function getVersion() {
+    return "/v1/";
+}
 function getVersionedRoot() {
-    return "/v1/erin/";
+    return getVersion() + "erin/";
 }
 
 function postForm(event, entity, formName) {
     event.preventDefault();
+    console.log('postForm:' + entity + "," + formName);
     var dataToBeSent = toJSON($(formName).serializeArray());
     return $.ajax({
         type: "POST",
@@ -70,21 +79,13 @@ function postForm(event, entity, formName) {
         },
         data: dataToBeSent,
         success: function(data) {
-            setStatus("Added");
-            var id = data[0].id;
 
-            var callMenu = false;
-            if ( data[0].people_id != undefined) {
-                id = data[0].people_id;
-                callMenu = true;
-            }
-            if ( callMenu) {
-                var tab = '#' + entity + '-tab';
-                if ($(tab).trigger != undefined) {
-                    $(tab).trigger('click');
-                }
+           var id = data[0].id;
+
+            if ( id ) {
+               window.location.replace(getVersion() + "/erin-form.html?entity=" + entity + "&id=" +id);
             } else {
-                window.location.replace("/" + ROOT_ENTITY + ".html?id=" + id);
+              window.location.reload();
             }
         },
 
@@ -182,8 +183,64 @@ function generateLookupComponent(entity) {
 
 
     var r = dhtml.replace(/__ENTITY__/g,entity);
-    $('#main').append(r);
+    $('#main-entity').append(r);
 
+
+}
+
+function initComboBox(entity, col, displayCols, targetElem, lookup, idCol) {
+
+    console.log('initComboBox:'+ targetElem +',' + lookup +',' + idCol);
+    if ( typeof idCol == 'undefined' ) {
+        idCol = "id";
+    }
+    var idValue = $(targetElem).val();
+    if ( idValue ) {
+       lookupEntityById(entity, idValue, function(data) {
+           var content = '';
+           for ( var i in displayCols) {
+               content += data[displayCols[i]] + " ";
+           }
+          $(lookup).val(content);
+       });
+    }
+    $(lookup).autocomplete({
+        source: function (request, response) {
+            $.ajax({
+                url: "/v1/erin/" + entity + "/lookup",
+                data: {
+                    val: request.term,
+                    col: col,
+                    id_col: idCol,
+                    display_cols: displayCols
+                },
+                success: function (data) {
+                    return response(data);
+
+                }
+            });
+        },
+
+        select: function (e, ui) {
+
+            if ( targetElem.indexOf('#') === 0 ) {
+                $(targetElem).val(ui.item.data);
+            }  else {
+                window.location.replace(targetElem + ui.item.data);
+            }
+
+        },
+        delay: 500,
+        minLength: 3,
+        response: function (event, ui) {
+            if (!ui.content.length) {
+                var noResult = { value: "", label: "No Match" };
+                ui.content.push(noResult);
+            }
+
+        }
+
+    });
 
 }
 function initLookup(entity, col, displayCols, targetElem, alignTo, idCol ) {
@@ -307,9 +364,9 @@ function populateDetail(entity, id) {
 
         $.getJSON(getVersionedRoot() + entity + "/" + id, function (data) {
 
-            renderTemplate(entity, data, '#main');
-//            setupTabs(entity + "_id", id);
+            renderTemplate(entity, data, '#main-entity');
             setupForm(entity, putForm, true);
+            populateRelationships(entity, data, "#list-right");
 
         })
             .fail(function (err) {
@@ -322,13 +379,26 @@ function populateDetail(entity, id) {
             });
 
 }
-function populateSummary(entity, key, value, target) {
+function populateSummary(entity, key, value, target, summary_view) {
 
     var name = entity + "-summary";
     compileTemplate(name).then( function() {
 
-        $.getJSON(getVersionedRoot() + entity +"?"+ key +"=" +value, function (data) {
+        var ent = entity;
+        if ( summary_view ) {
+            ent = summary_view;
+        }
+        var url = getVersionedRoot() + ent;
+        if ( value !== '*') {
+            url = url +"?"+ key +"=" +value;
+        }
+        console.log('url:' + url);
+        $.getJSON(url, function (data) {
             renderTemplate(name, data, target);
+            if ( data.items[0].id) {
+                populateDetail(entity, data[0].id);
+            }
+
         })
         .fail(function (err) {
                 if (err.status == 404) {
@@ -337,13 +407,16 @@ function populateSummary(entity, key, value, target) {
 
         })
          .error(function (XMLHttpRequest, textStatus, errorThrown) {
+                if ( XMLHttpRequest.responseText != "Not Found") {
                     $('#exception').html(XMLHttpRequest.responseText);
+                }
          });
         });
 }
 function populateRelationships(entity, data, target) {
 
     var name = entity + "-relationships";
+    console.log('populate_relationships with ' + data.person_id);
     compileTemplate(name).then( function() {
         renderTemplate(name, data, target);
     });
@@ -361,9 +434,69 @@ function filterFields(data, map) {
 
 
 function prepopulateForm(entity, parent_entity, value, target, prePopMap) {
-    lookupEntityById(parent_entity, value, function( data) {
+    return lookupEntityById(parent_entity, value, function( data) {
         renderTemplate(entity, filterFields(data, prePopMap), target);
+        setupForm(entity,postForm, false);
     });
+}
+
+function hideInfoLookup() {
+    $('#info-overlay').fadeOut(700);
+}
+
+
+
+primaryKeyNames = { 'media_types' : 'media_type'};
+
+function getPrimaryKeyName(entity) {
+    var id = primaryKeyNames[entity];
+    if ( id == undefined) {
+        return 'id';
+    }
+    return id;
+}
+
+prefixToTable = { 'pp' : { 'entity' : 'people', columns : ['name']},
+    tv : { 'entity' : 'shows', columns : ['show_name']},
+    sh : { 'entity' : 'shows', columns : ['show_name']}}
+
+
+function getInfo(elem, entity, columns) {
+
+
+    if ( $(elem).val()) {
+
+
+        if ( $(elem).attr('name') === 'table_id') { //figure out which table to query
+             var prefix = $(elem).val().substr(0,2);
+            console.log('prefix=' + prefix);
+             entity = prefixToTable[prefix].entity;
+            columns = prefixToTable[prefix].columns;
+        }
+        $.getJSON(getVersionedRoot() + entity + "/" + $(elem).val(), function (data) {
+
+            var content = '';
+            for ( var i = 0;i<columns.length;i++) {
+
+                content += data[columns[i]];
+                content += ' ';
+            }
+            var primaryKey = getPrimaryKeyName(entity);
+               var ln = "<a href=" + getVersion() + "erin-form.html?entity=" + entity + "&" + primaryKey +"=" + $(elem).val() +">" + content + "</a>";
+               $('#info-overlay').html(ln);
+               $('#info-overlay').addClass('infoBox').show();
+
+                $('#info-overlay').position({
+                    my: "left+20",
+                    at: "left bottom",
+                    of: elem,
+                    collision: "flip"
+                })
+
+            });
+
+    }
+
 }
 
 
