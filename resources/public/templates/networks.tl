@@ -22,7 +22,7 @@
             </div>
             <div class="pure-control-group">
                 <label for="update_date">Update Date</label>
-                <input type="text" name="Update_date" id="update_date" placeholder="Update Date" readonly value="{update_date}">
+                <input type="text" name="update_date" id="update_date" placeholder="Update Date" readonly value="{update_date}">
             </div>
             <div class="pure-controls">
                 <button type="submit" id='submit' class="pure-button pure-button-primary">Add</button>

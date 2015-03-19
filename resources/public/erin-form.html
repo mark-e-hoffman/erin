@@ -13,6 +13,7 @@
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
     <script type="text/javascript" src="https://code.jquery.com/ui/1.11.3/jquery-ui.js"></script>
     <script type="text/javascript" src="js/dust.js"></script>
+    <script type="text/javascript" src="js/dust-helpers.js"></script>
     <script type="text/javascript" src="js/purl.js"></script>
     <script type="text/javascript" src="js/erin-forms.js"></script>
 
@@ -20,76 +21,145 @@
 <body>
 <div id="main">
 
-    <div id='menus' class="pure-menu pure-menu-open pure-menu-horizontal">
-        <ul>
-            <li><a id="shows-tab" href='erin-form.html?entity=shows'>Shows</a></li>
-            <li><a id="people-tab" href='erin-form.html?entity=people'>People</a></li>
-            <li><a id="networks-tab" href='erin-form.html?entity=networks'>Networks</a></li>
-        </ul>
-    </div>
 
     <div id="main-entity"></div>
+    <div style="height:10px"></div>
+    <div id="tabs-wrapper">
+     <div id='tabs-menu' class="pure-menu pure-menu-open pure-menu-horizontal">
+        <ul class="pure-menu-list" id="tabs">
+        </ul>
+        </div>
+     <div id="main-tab" class="tabular-summary"></div>
+    <div id="links"></div>
+    </div>
 </div>
-<div id="list-left" class="link-list"></div>
-<div id="list-right" class="link-list"></div>
 
 <div style="position:absolute;left:0;top:0" id="exception"></div>
 <input type="hidden" id="refreshed" value="no">
-"</div><div id='info-overlay' class='hidden'></div></div>
+</div><div id='info-overlay' class='hidden'></div></div>
 </body>
 <script>
 
-
-    var lookupMap = {
-        "showsss": function () {
-            initComboBox("media_types", 'media_type', ['media_type'], "#shows-form #media_type", "#shows-media_type-search", "media_type");
-            initComboBox("networks", 'network', ['network'], "#shows-form #network_id", "#shows-network-search");
-            },
-        "people": function () {
-            initLookup("people", 'name', ['name'], "/v1/erin-form.html?entity=people&id=", "#people-name-search");
-
-        },
-        "creditss": function () {
-           // initLookup("shows", 'show_name', ['show_name'], "#credits-form #table_id", "#credits-show_name-search")
-           // initLookup("people", 'name', ['name'], "#credits-form #person_id", "#credits-person_id-search")
-           // initLookup("characters", 'character_name', ['character_name'], "#credits-form #character_id", "#credits-character_id-search")
-           // initLookup("person_roles", 'person_role', ['person_role'], "#credits-form #role_id", "#credits-role_id-search");
-        },
-        "characters": function () {
-            initLookup("characters", 'name', ['name'], "/v1/erin-form.html?entity=characters&id=", "#characters-name-search");
-
-        },
-        "networks": function () {
-            initLookup("networks", 'network', ['network'], "/v1/erin-form.html?entity=networks&id=", "#networks-network-search");
-
-        },
-        "social_links" : function () {
-            initLookup("shows_and_people", 'table_name', ['table_name'], "#social_links-form #table_id", "#social_links-table_id-search")
-            initLookup("social_link_types", 'link_type', ['link_type'], "#social_links-form #link_type", "#social_links-link_type-search", "link_type")
-        }
-
-    };
+    var parenData;
 
 
     var prePopMap = {
         "episodes" : {
             "id" : "series_id",
+            "show_name" : "parent_show_name",
             "network_id" : "network_id",
             "origin_language" : "origin_language",
             "origin_country" : "origin_country",
             "top_cast" : "top_cast"
+        },
+        "credits" : {
+            "id" : "table_id",
+            "name" : "credits_person_id_search",
+            "show_name" : "credits_table_id_search"
+        },
+        "social_links" : {
+            "id" : "table_id",
+            "show_name|name" : "social_links_table_id_search"
         }
+
 
     };
 
-    function getLookups(entity) {
-        var func = lookupMap[entity];
+    var subTabs = {
+        shows: [
+            { name : "Credits", entity : "credits", key : "table_id", view : "credits_summary"},
+            { name : "Social Links", entity : "social_links", key : "table_id"},
+            { name : "Episodes", entity : "episodes", key : "series_id"}
 
-        if ( func ) {
+        ],
+        episodes: [
+            { name : "Credits", entity : "credits", key : "table_id", view : "credits_summary"},
+            { name : "Social Links", entity : "social_links", key : "table_id"}
 
-            func.apply();
+
+        ],
+        credits: [
+            { name : "Shows/Episodes", entity : "shows", key : "id", source_key_column_name : "table_id" },
+            { name : "People", entity : "people", key : "id", source_key_column_name : "person_id" }
+
+
+        ],
+        people: [
+
+            { name : "Credits", entity : "credits", key : "person_id", view : "credits_summary"},
+            { name : "Social Links", entity : "social_links", key : "table_id"}
+
+        ]
+    }
+
+
+    function logItem(o) {
+        var d = "";
+        for ( var i in o) {
+            d += i + "=" +o[i] + ",";
+        }
+        console.log(d);
+    }
+    function addAttributesForAdd(entity, data, href, calling_entity) {
+        var props = "";
+        console.log('adding attributes for add for entity ' + entity);
+        if ( prePopMap[entity]) {
+            var prePops = prePopMap[entity];
+            for ( var from in prePops ) {
+
+               var froms = from.split('|');
+                console.log('split of ' + from + ' produced ' + froms);
+               var val = "";
+               for ( var i = 0;i<froms.length;i++) {
+                   val = data[froms[i]]
+                   if ( val) {
+                       break;
+                   }
+               }
+               props += "&" + prePops[from]+ "=" +  val;
+            }
+            props += "&calling_entity=" + calling_entity;
+        }
+        return href + props;
+
+
+    }
+    function renderTabHeadings(entity, parent_data) {
+        if (subTabs[entity]) {
+
+
+            for (var i = subTabs[entity].length - 1; i >= 0; i--) {
+                var tab = subTabs[entity][i];
+                console.log("renderTabs:" + tab.entity);
+                $("#tabs-menu #tabs").prepend("<li id=\"" + tab.entity + "\" pos=" + i + " class='pure-menu-item'><a href='#'>" + tab.name + "</a></li>");
+                $("#tabs-menu #tabs #" + tab.entity).click(function (evt) {
+                    var pos = $(this).attr('pos');
+                    var t = subTabs[entity][pos];
+                    var source_key_column_name = t.source_key_column_name;
+                    if ( source_key_column_name == undefined ) {
+                        source_key_column_name = "id";
+                    }
+                    var id_value = parent_data[source_key_column_name];
+                    populateTab(t.entity, t.key, id_value, "#main-tab", t.view, "#links", entity);
+
+                });
+            }
         }
     }
+
+    function queryStringToJSON() {
+        var pairs = location.search.slice(1).split('&');
+
+        var result = {};
+        pairs.forEach(function(pair) {
+            pair = pair.split('=');
+            result[pair[0]] = decodeURIComponent(pair[1] || '');
+        });
+
+        return JSON.parse(JSON.stringify(result));
+    }
+
+
     $(document).ready(function () {
 
         var e=document.getElementById("refreshed");
@@ -104,40 +174,25 @@
         var entity_id = $.url().param('id');
         var key = $.url().param('key');
         var value = $.url().param('value');
-        var parent_entity = $.url().param('parent_entity');
         var summary_view = $.url().param('summary_view');
-        console.log('entity:' + entity +',entity_id:' + entity_id + "key+" + key + ",value=" + value + ",parent_entity:" + parent_entity);
 
-        if ( key ) {
-            populateSummary(entity, key, value, "#list-left", summary_view)
-        }
+
         compileTemplate(entity)
                 .then(
                     lookupEntityById(entity, entity_id, function(data ) {
                         renderTemplate(entity, data, "#main-entity");
-                        console.log('calling getLookups...');
-                        getLookups(entity);
-                        populateRelationships(entity, data, "#list-right");
+                        renderTabHeadings(entity, data);
 
                         if (!jQuery.isEmptyObject(data)) {
-
+                            parent_data = data;
                             setupForm(entity,putForm, true);
-
+                            $("#tabs").children().first().click();
                         } else {
-
+                            var qsJson =  queryStringToJSON();
+                            console.log(JSON.stringify(qsJson));
+                            renderTemplate(entity,queryStringToJSON(), "#main-entity");
                             setupForm(entity, postForm, false);
-                            if ( parent_entity == 'foobar') {
-
-                                if (prePopMap[entity]) {
-                                    prepopulateForm(entity, parent_entity, value, "#main-entity", prePopMap[entity]);
-                                }
-
-                            }
-                            else {
-                                //setupForm(entity, postForm, false);
-                            }
                         }
-
 
 
                     }));
@@ -145,5 +200,11 @@
 
 
     });
+
+    function addEntity(entity, calling_entity) {
+        var href = addAttributesForAdd(entity, parent_data, "erin-form.html?entity=" + entity, calling_entity);
+        window.location.href = href;
+        return false;
+    }
 </script>
 </html>

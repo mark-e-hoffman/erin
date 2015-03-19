@@ -12,16 +12,14 @@ function renderTemplate(name, data, target) {
     });
 }
 
-function setupForm( name, func, update, callBack) {
+function setupForm( name, func, update) {
     var formName = '#' + name + '-form';
+    console.log("setupForm:" + formName + ",update=" + update);
     $(formName).submit(function (event) {
-        console.log('calling submit for:' + formName);
         event.preventDefault();
-        func(event, name, formName, callBack);
+        func(event, name, formName);
     });
-    console.log("setupForm:" + formName + ', update=' + update);
     if ( update ) {
-        console.log(formName + ' changing to update');
         $(formName + ' #submit-button').html("Update");
     }
 }
@@ -83,7 +81,7 @@ function postForm(event, entity, formName) {
            var id = data[0].id;
 
             if ( id ) {
-               window.location.replace(getVersion() + "/erin-form.html?entity=" + entity + "&id=" +id);
+               window.location.href = getVersion() + "/erin-form.html?entity=" + entity + "&id=" +id;
             } else {
               window.location.reload();
             }
@@ -114,12 +112,7 @@ function putForm(event, entity, formName) {
         },
         success: function(data) {
             setStatus("Updated");
-            var tab = '#' + entity + '-tab';
-            if ($(tab).trigger != undefined) {
-                $(tab).trigger('click');
-            } else {
-                window.location.reload();
-            }
+            window.location.reload();
         },
 
         data: dataToBeSent,
@@ -226,7 +219,7 @@ function initComboBox(entity, col, displayCols, targetElem, lookup, idCol) {
             if ( targetElem.indexOf('#') === 0 ) {
                 $(targetElem).val(ui.item.data);
             }  else {
-                window.location.replace(targetElem + ui.item.data);
+                window.location.href = targetElem + ui.item.data;
             }
 
         },
@@ -274,7 +267,7 @@ function initLookup(entity, col, displayCols, targetElem, alignTo, idCol ) {
                 $(targetElem).val(ui.item.data);
             }  else {
 
-                window.location.replace(targetElem + ui.item.data);
+                window.location.href = targetElem + ui.item.data;
             }
             $(lookup).hide();
         },
@@ -379,6 +372,7 @@ function populateDetail(entity, id) {
             });
 
 }
+
 function populateSummary(entity, key, value, target, summary_view) {
 
     var name = entity + "-summary";
@@ -412,6 +406,93 @@ function populateSummary(entity, key, value, target, summary_view) {
                 }
          });
         });
+}
+function syncTabHeaderWidths(source) {
+
+    var table = $(source).find("table");
+
+    var th = table.find("thead tr:first");
+    var tr = table.find("tbody tr:first");
+    var td_widths = [];
+    var th_widths = []
+    var pos = 0;
+    tr.find("td").each(function() {
+        td_widths[pos++] = $(this).width();
+        });
+
+    pos = 0;
+    th.find("th").each(function() {
+        th_widths[pos++] = $(this).width();
+    });
+
+    var widths = [];
+    var total_width = 0;
+    for ( var i = 0;i<td_widths.length;i++) {
+        widths[i] = td_widths[i];
+        if ( th_widths[i] > td_widths[i]) {
+            widths[i]=th_widths[i];
+        }
+        total_width += widths[i];
+    }
+
+    pos = 0;
+    th.find("th").each(function() {
+        $(this).width(widths[pos++]);
+        });
+    pos=0;
+    tr.find("td").each(function() {
+        $(this).width(widths[pos++]);
+    });
+
+
+}
+function populateTab(entity, key, value, target, view, links, calling_entity) {
+
+    console.log("populateTab:" + entity);
+    var name = entity + "-tab";
+    return compileTemplate(name).then( function() {
+
+        var ent = entity;
+        if ( view ) {
+            ent = view;
+        }
+        var url = getVersionedRoot() + ent;
+        url = url +"?"+ key +"=" +value + "&_limit=20&_offset=0";
+         $.getJSON(url, function (data) {
+             data.template = name;
+             data["calling_entity"] = calling_entity;
+            renderTemplate(name, data, target);
+            compileTemplate("tab-navigation").then(function() {
+
+                renderTemplate("tab-navigation",data, links)
+                syncTabHeaderWidths(target);
+            });
+        })
+            .fail(function (err) {
+                if (err.status == 404) {
+                    // alert("Cannot locate " + entity + "(s)");
+                }
+
+            })
+            .error(function (XMLHttpRequest, textStatus, errorThrown) {
+                if ( XMLHttpRequest.responseText != "Not Found") {
+                    $('#exception').html(XMLHttpRequest.responseText);
+                }
+            });
+    });
+}
+
+function populateTabFromLinks(name, url, target) {
+
+
+    return $.getJSON(url, function (data) {
+        renderTemplate(name, data, target);
+        compileTemplate("tab-navigation").then(function() {
+            data.template = name;
+            renderTemplate("tab-navigation",data, links)
+            syncTabHeaderWidths(target);
+        });
+    })
 }
 function populateRelationships(entity, data, target) {
 
@@ -497,6 +578,10 @@ function getInfo(elem, entity, columns) {
 
     }
 
+}
+
+function setValue(selector, value) {
+    $(selector).val(value);
 }
 
 

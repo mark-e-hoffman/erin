@@ -1,8 +1,10 @@
 <div id="episodes-wrapper">
 <legend> <a href="erin-form.html?entity=episodes" class="add-entity">+</a> Episodes</legend>
 <form class="pure-form pure-form-aligned" id="episodes-form">
+    <table>
        <fieldset>
-
+    <tr>
+     <td>
     <div class="pure-control-group">
             <label for="id">Id</label>
             <input type="text" name="id" id="id" placeholder="Id" readonly value="{id}">
@@ -26,6 +28,8 @@
                 <label for="series_id">Series ID</label>
                 <input type="text" name="series_id" id="series_id" onmouseleave="hideInfoLookup();" onmouseover="getInfo('#episodes-form #series_id','shows',['show_name']);" placeholder="Series ID" readonly value="{series_id}">
         </div>
+      </td>
+      <td>
     <div class="pure-control-group">
             <label for="start_year">Start Year</label>
             <input type="text" name="start_year" id="start_year" placeholder="Start Year" value="{start_year}">
@@ -47,24 +51,27 @@
                  <label for="origin_country">Origin Country</label>
                  <input type="text" name="origin_country" id="origin_country" placeholder="Origin Country" value="{origin_country}">
           </div>
-
+     </td>
+      </tr>
+       <tr>
+           <td colspan="2">
       <div class="pure-control-group">
                 <label for="short_desc">Short Description</label>
-                <textarea name="short_desc" id="short_desc" form="episodes-form">{short_desc}</textarea>
+                <textarea cols="80" name="short_desc" id="short_desc" form="episodes-form">{short_desc}</textarea>
         </div>
 
            <div class="pure-control-group">
                         <label for="plot_desc">Plot Description</label>
-                        <textarea name="plot_desc" id="plot_desc" form="episodes-form">{plot_desc}</textarea>
+                        <textarea cols="80" name="plot_desc" id="plot_desc" form="episodes-form">{plot_desc}</textarea>
                 </div>
        <div class="pure-control-group">
                  <label for="top_cast">Top Cast</label>
-                 <input type="text" name="top_cast" id="top_cast" placeholder="Top Cast" value="{top_cast}">
+                 <input size="80" type="text" name="top_cast" id="top_cast" placeholder="Top Cast" value="{top_cast}">
           </div>
 
            <div class="pure-control-group">
                         <label for="editor_notes">Editor Notes</label>
-                        <textarea name="editor_notes" id="editor_notes" form="episodes-form">{editor_notes}</textarea>
+                        <textarea cols="80" name="editor_notes" id="editor_notes" form="episodes-form">{editor_notes}</textarea>
                 </div>
 
            <div class="pure-control-group">
@@ -80,11 +87,32 @@
                              <label for="part_num">Part Number</label>
                              <input type="text" name="part_num" id="part_num" placeholder="Part Number" value="{part_num}">
                      </div>
+               </td>
+           </tr>
+       </fieldset>
+      </table>
 
     <div class="pure-controls">
             <button type="submit" id="submit-button"   class="pure-button pure-button-primary">Add</button>
     </div>
-    </fieldset>
+
     </form>
 </div>
+
+<script>
+    $(function () {
+        $("#episodes-form #orig_air_date").datepicker({
+            dateFormat: "yy-mm-dd"
+        });
+    });
+    $(function () {
+        $("#episodes-form #release_date").datepicker({
+            dateFormat: "yy-mm-dd"
+        });
+    });
+    initComboBox("media_types", 'media_type', ['media_type'], "#episodes-form #media_type", "#episodes_media_type_search", "media_type");
+    initComboBox("networks", 'network', ['network'], "#episodes-form #network_id", "#episodes_network_search");
+</script>
+
+
 

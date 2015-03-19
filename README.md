@@ -1,6 +1,7 @@
 # erin
 
-FIXME
+Rest Server for erin database tables, along with web front end for editing tables
+
 
 ## Prerequisites
 
@@ -12,8 +13,7 @@ You will need [Leiningen][] 2.0.0 or above installed.
 
 To start a web server for the application, run:
 
-    lein ring server
+    lein ring server-headless [port]
 
-## License
+defaults to 8080
 
-Copyright © 2015 FIXME

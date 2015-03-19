@@ -31,27 +31,30 @@
 (defn on-last-page? [total_items limit offset ]
   (>= (+ limit offset ) total_items))
 
+(defn add-empty-link [ name]
+  { :rel name :href "#" })
+
 (defn add-next-link [ table total_items control params ]
-  (if (or (= 0 total_items ) (on-last-page? total_items (:limit control) (:offset control))) nil
+  (if (or (= 0 total_items ) (on-last-page? total_items (:limit control) (:offset control))) (add-empty-link :next)
     { :rel :next
       :href (str "/v1/erin/" (name table) "?" (ring.util.codec/form-encode (merge params (gen-limit-and-offset :next total_items control)))) }))
 
 
 (defn add-previous-link [ table total_items control params ]
   (if (or (= 0 total_items )
-          (= 0 (:offset control))) nil
+          (= 0 (:offset control))) (add-empty-link :previous)
              { :rel :previous
                :href (str "/v1/erin/" (name table) "?" (ring.util.codec/form-encode (merge params (gen-limit-and-offset :previous total_items control)))) }))
 
 
 (defn add-first-link [ table total_items control params ]
-  (if (or (= 0 total_items ) (= 0 (:offset control))) nil
+  (if (or (= 0 total_items ) (= 0 (:offset control))) (add-empty-link :first)
     { :rel :first
      :href (str "/v1/erin/" (name table) "?" (ring.util.codec/form-encode (merge params (gen-limit-and-offset :first total_items control)))) }))
 
 
 (defn add-last-link [ table total_items control params ]
-  (if (or (= 0 total_items ) (on-last-page? total_items (:limit control) (:offset control))) nil
+  (if (or (= 0 total_items ) (on-last-page? total_items (:limit control) (:offset control))) (add-empty-link :last)
        { :rel :last
          :href (str "/v1/erin/" (name table) "?" (ring.util.codec/form-encode (merge params (gen-limit-and-offset :last total_items control))))}))
 
@@ -60,8 +63,9 @@
     (filter identity
             [
              (add-first-link table total_items control params)
-             (add-next-link table total_items control params)
              (add-previous-link table total_items control params)
+
+             (add-next-link table total_items control params)
              (add-last-link table total_items control params)
              ]))
 

@@ -24,6 +24,7 @@ database :
        shows_and_people : "shows_and_people"
     primary-keys :
        media_types : "media_type"
+       social_link_types: "link_type"
 
 http :
    port : 8080

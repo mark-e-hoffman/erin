@@ -9,15 +9,15 @@
     </div>
     <div class="pure-control-group">
             <label for="name">Name</label>
-            <input type="text" name="name" id="name" placeholder="Name" value="{name}"><div class="inline" id='people-name-search'></div>
+            <input type="text" size="40" name="name" id="name" placeholder="Name" value="{name}">
     </div>
     <div class="pure-control-group">
             <label for="person_note">Note</label>
-            <textarea name="person_note" id="person_note" form="people-form">{person_note}</textarea>
+            <textarea name="person_note" cols="80" id="person_note" form="people-form">{person_note}</textarea>
     </div>
     <div class="pure-control-group">
             <label for="personal_wiki">Personal Wiki</label>
-            <input type="text" name="personal_wiki" id="personal_wiki" placeholder="Personal Wiki" value="{personal_wiki}">
+            <input type="text" size="40" name="personal_wiki" id="personal_wiki" placeholder="Personal Wiki" value="{personal_wiki}">
     </div>
     <div class="pure-control-group">
             <label for="home_town">Home Town</label>
@@ -42,8 +42,22 @@
 
 
     <div class="pure-controls">
-            <button type="submit" id='submit' class="pure-button pure-button-primary">Add</button>
+            <button type="submit" id='submit-button' class="pure-button pure-button-primary">Add</button>
     </div>
     </fieldset>
     </form>
 </div>
+<script>
+    $(function () {
+        $("#people-form #birthdate").datepicker({
+            dateFormat: "yy-mm-dd"
+        });
+    });
+    $(function () {
+        $("#shows-form #deathdate").datepicker({
+            dateFormat: "yy-mm-dd"
+        });
+    });
+ </script>
+
+

@@ -53,7 +53,7 @@ e.g { :id :varchar }"
 
 
 (defn get-primary-key-column [ table ]
-  (println (str table "," (:primary-keys erindb-meta-data)))
+  (println (str "get-primary-key-column:" table "," (:primary-keys (erindb-meta-data))))
   (get-in (erindb-meta-data) [:primary-keys (keyword table) ] "id" ))
 
 (def dt-parser (partial f/parse multi-parser))
@@ -73,6 +73,7 @@ e.g { :id :varchar }"
   (println (str "preparefield:" p "," dt))
   (let [ name (key p)
          value (val p)]
+    (println (str "val = " value))
     (if (nil? value) p
         [ name ((dt conversion-map) value ) ])))
 
@@ -81,7 +82,6 @@ e.g { :id :varchar }"
 
   (let [sql-table (get-in (erindb-meta-data) [:tables table])
         dt (get-in (erindb-meta-data) [:data-types (keyword sql-table)])]
-    (println (str "got:" + sql-table " for " table))
        (into {} (map #(prepare-field % (get dt (key %))) m))))
 
 (defn add-user-id [ m]

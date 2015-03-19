@@ -5,11 +5,18 @@
         float:right;
 }
 .form-panel {
+    border-style: none;
+    border-width: 0px;
+    display: table;
+    float: none;
+}
+
+.form-panel-float-left {
     float:left;
-    top: 1%;
     border-style: none;
     border-width: 0px;
 }
+
 
 .forn-panel-column {
     width: 33%;
@@ -44,6 +51,9 @@
 .inline {
     display :inline-block;
 }
+.block {
+    display : block;
+}
 
 .float-left {
     float:left;
@@ -70,7 +80,6 @@ div.link-list {
     padding-left:1em;
     padding-right:1em;
     /* height:100%; */
-    overflow: scroll;
 }
 /* and then we put each list on its place */
 #list-left {
@@ -84,9 +93,9 @@ div.link-list {
 .add-entity {
     display: inline-block;
     border-style: solid;
-    border-width: 2px;
-    padding: 5px 5px;
-    color:green;
+    border-width: 1px;
+    padding: 2px 1px;
+    color: black;
     text-decoration: none;
 }
 
@@ -109,3 +118,45 @@ div.link-list {
     content:url(icons/toolbar_find.png)
 }
 
+.tabular-summary {
+    overflow: scroll;
+    max-height: 300px;
+    width: auto;
+}
+
+#links {
+    float: left;
+    margin-left:10.2em;
+    margin-right:10.2em;
+    padding-left:1em;
+    padding-right:1em;
+
+}
+#tab-navigation {
+    float: left;
+    padding-top:10px;
+
+}
+.nav-link {
+    padding-left:1em;
+    padding-right:1em;
+    background-color: black;
+    color: white;
+}
+
+#con{
+    max-height:300px;
+    overflow-y:auto;
+}
+thead tr:first-child {
+    background-color:lightgray;
+    color:black;
+    position:absolute;
+}
+tbody tr:first-child td{
+    padding-top:40px;
+}
+
+.row-table {
+    width: 500px;
+}
